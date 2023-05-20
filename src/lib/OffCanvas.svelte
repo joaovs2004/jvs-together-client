@@ -1,6 +1,6 @@
 <script>
     import { getWorkingYoutubeThumbUrl } from "../helpers";
-import { roomId, videoId, history } from "../stores";
+import { roomId, history } from "../stores";
     import { ws } from "../webSocket";
     import { X } from "lucide-svelte";
 

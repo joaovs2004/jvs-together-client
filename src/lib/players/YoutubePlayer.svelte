@@ -1,12 +1,13 @@
 <script lang="ts">
     import YouTube from 'svelte-youtube';
-    import { ignoreNextEvent, roomId, videoId } from '../../stores';
-    import { ws } from '../../webSocket';
+    import { ignoreNextEvent, roomId, videoProps } from '../../stores';
     import { writable } from 'svelte/store';
+    import { onDestroy } from 'svelte';
 
     let player;
     let ready = false;
-    let readyFunction;
+    let readyFunctions = [];
+    let updateInterval;
 
     export const playing = writable(false);
     export const currentTime = writable(0);
@@ -14,7 +15,7 @@
     export const captions = writable([]);
 
     export function onReady(fn: () => void) {
-        readyFunction = fn;
+        readyFunctions.push(fn);
 
         if(ready) {
             fn();
@@ -49,9 +50,7 @@
         player = event.detail.target;
         player.loadModule("captions");
 
-        if(readyFunction) readyFunction();
-
-        setInterval(() => {
+        updateInterval = setInterval(() => {
             currentTime.set(player.getCurrentTime());
             durationTime.set(player.playerInfo.duration);
 
@@ -62,7 +61,9 @@
 
     function stateChange(e) {
         if(e.detail.data == 5) {
-            ws.send(JSON.stringify({ type: "setReady", roomId: $roomId }));
+            for (const fn of readyFunctions)
+                fn();
+            // ws.send(JSON.stringify({ type: "setReady", roomId: $roomId }));
         }
     }
 
@@ -83,11 +84,15 @@
             return;
         }
     }
+
+    onDestroy(() => {
+        clearInterval(updateInterval);
+    });
 </script>
 
 <!-- @ts-expect-error -->
 <YouTube
-    videoId={$videoId}
+    videoId={$videoProps.id}
     id="player"
     options={{
         width: 1024,

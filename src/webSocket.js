@@ -1,5 +1,7 @@
 import { getWritableValue } from "./helpers";
-import { player, clientId, roomId, connectedClients, videoId, playbackrate, history, ignoreNextEvent } from "./stores";
+import { player, playerComponent, clientId, roomId, connectedClients, videoProps, playbackrate, history, ignoreNextEvent } from "./stores";
+import YoutubePlayer from './lib/players/YoutubePlayer.svelte';
+import DashPlayer from './lib/players/DASHPlayer.svelte';
 
 export const ws = new WebSocket(import.meta.env.VITE_WS_URL);
 
@@ -17,7 +19,13 @@ ws.addEventListener("message", async (msg) => {
     } else if(message.type == "connectedClients") {
         connectedClients.set(message.clients);
     } else if(message.type == "setVideo") {
-        videoId.set(message.videoId);
+        if(!message.isRestrictedVideo) {
+            videoProps.set({id: message.videoId});
+            playerComponent.set(YoutubePlayer);
+        } else {
+            videoProps.set({id: message.videoId, tracks: message.tracks, duration: message.duration, thumbnail: message.thumbnail})
+            playerComponent.set(DashPlayer);
+        }
     } else if(message.type == "seeked") {
         ytPlayer.seek(message.time);
     } else if(message.type == "setPlaying") {

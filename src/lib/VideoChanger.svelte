@@ -1,20 +1,12 @@
 <script>
     import { ws } from "../webSocket";
-    import { roomId, videoId } from "../stores";
+    import { roomId } from "../stores";
 
     let inputVideoUrl;
 
     function setVideoId() {
         if(inputVideoUrl) {
-            const videoUrl = new URL(inputVideoUrl);
-
-            if(videoUrl.pathname == "/watch") {
-                videoId.set(videoUrl.searchParams.get("v"));
-            } else {
-                videoId.set(videoUrl.pathname.substring(8));
-            }
-
-            ws.send(JSON.stringify({ type: "setVideo", videoId: $videoId, broadcast: true, roomId:$roomId }));
+            ws.send(JSON.stringify({ type: "setVideo", url: inputVideoUrl, broadcast: true, roomId:$roomId }));
 
             inputVideoUrl = "";
         }

@@ -15,8 +15,10 @@
   },
   "dependencies": {
     "lucide-svelte": "^0.125.0",
+    "shaka-player": "^4.3.6",
     "svelte-easy-popover": "^1.0.0",
     "svelte-navigator": "^3.2.2",
-    "svelte-youtube": "^0.0.2"
+    "svelte-youtube": "^0.0.2",
+    "xmlbuilder2": "^3.1.1"
   }
 }

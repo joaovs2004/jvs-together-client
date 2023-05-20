@@ -1,21 +1,16 @@
 <script lang="ts">
     import { convertSeconds } from '../helpers';
-    import { player, roomId } from '../stores';
+    import { player, playerComponent, roomId } from '../stores';
     import { ws } from '../webSocket';
     import PlaybackPopover from './PlaybackPopover.svelte';
     import VolumePopover from './VolumePopover.svelte';
 
     import { Play, Pause, Maximize2 } from "lucide-svelte";
     import CaptionsPopover from './CaptionsPopover.svelte';
-    import YoutubePlayer from './players/YoutubePlayer.svelte';
-    import type { ComponentType, SvelteComponentTyped } from 'svelte';
-    import type { playerProvider } from '../playerProvider';
 
     let rangeValue = 0;
 
     let playerContainer;
-
-    let currentPlayerComponent: ComponentType<SvelteComponentTyped & playerProvider> = YoutubePlayer;
 
     let isFullScreen = false;
 
@@ -25,6 +20,9 @@
             ws.send(JSON.stringify({ type: "setPlaying", status: value, roomId: $roomId }));
         }
     });
+    $: $player?.onReady(() => {
+        ws.send(JSON.stringify({ type: "setReady", roomId: $roomId }));
+    })
 
     $: rangeValue = ($currentTime / $durationTime) * 1000;
 
@@ -72,7 +70,7 @@
 <svelte:window on:keydown={onKeyDown}/>
 
 <div id="playerContainer" bind:this={playerContainer} on:fullscreenchange={onFullscreenChange}>
-    <svelte:component this={currentPlayerComponent} bind:this={$player} />
+    <svelte:component this={$playerComponent} bind:this={$player} />
 
     {#if $player}
         <div id="controls" class:fullscreen={isFullScreen}>

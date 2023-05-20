@@ -1,6 +1,6 @@
 <script>
     import { getWorkingYoutubeThumbUrl } from "../helpers";
-    import { backgroundImageUrl, videoId } from "../stores";
+    import { backgroundImageUrl, videoProps } from "../stores";
 
     $: isCustomBackground = $backgroundImageUrl != null;
 </script>
@@ -8,7 +8,7 @@
 {#if isCustomBackground}
     <img src={$backgroundImageUrl} alt="Background">
 {:else}
-    {#await getWorkingYoutubeThumbUrl($videoId) then videoUrl }
+    {#await getWorkingYoutubeThumbUrl($videoProps.id) then videoUrl }
         <img src={videoUrl} alt="Background">
     {/await}
 {/if}
@@ -24,5 +24,6 @@
         height: 100vh;
         z-index: 1;
         filter: blur(10px) brightness(0.8);
+        object-fit: cover;
     }
 </style>

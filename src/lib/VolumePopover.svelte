@@ -7,12 +7,10 @@
 
     let referenceElement;
 
-    let volume = localStorage.getItem("previousVolume");
+    let volume = Number(localStorage.getItem("previousVolume"));
 
-    onMount(() => {
-        $player.onReady(() => {
-            $player.setVolume(volume);
-        });
+    $: $player.onReady(() => {
+        $player.setVolume(volume);
     });
 
     function changeVolume(e) {

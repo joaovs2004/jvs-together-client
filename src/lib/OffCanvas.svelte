@@ -1,6 +1,6 @@
 <script>
     import { getWorkingYoutubeThumbUrl } from "../helpers";
-import { roomId, history } from "../stores";
+    import { roomId, history } from "../stores";
     import { ws } from "../webSocket";
     import { X } from "lucide-svelte";
 
@@ -19,8 +19,7 @@ import { roomId, history } from "../stores";
     }
 
     function changeVideo(video) {
-        ws.send(JSON.stringify({ type: "setVideo", videoId: video.videoId, broadcast: true, roomId: $roomId }));
-        console.log(video.videoId);
+        ws.send(JSON.stringify({ type: "setVideo", url: video.url, broadcast: true, roomId: $roomId }));
     }
 </script>
 

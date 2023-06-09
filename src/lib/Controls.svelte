@@ -1,6 +1,6 @@
 <script lang="ts">
     import { convertSeconds } from '../helpers';
-    import { player, playerComponent, roomId } from '../stores';
+    import { ignoreNextEvent, player, playerComponent, roomId } from '../stores';
     import { ws } from '../webSocket';
     import PlaybackPopover from './PlaybackPopover.svelte';
     import VolumePopover from './VolumePopover.svelte';
@@ -9,17 +9,31 @@
     import CaptionsPopover from './CaptionsPopover.svelte';
 
     let rangeValue = 0;
+    let lastSubscription;
 
     let playerContainer;
 
     let isFullScreen = false;
 
     $: ({playing, currentTime, durationTime} = $player || {});
-    $: playing?.subscribe(value => {
-        if(ws.readyState == 1) {
-            ws.send(JSON.stringify({ type: "setPlaying", status: value, roomId: $roomId }));
-        }
+    player.subscribe(value => {
+        if(!value) return;
+        if(lastSubscription) lastSubscription();
+
+        lastSubscription = value.playing?.subscribe(value => {
+            if(ws.readyState == 1) {
+                if($ignoreNextEvent) {
+                    ignoreNextEvent.set(false);
+                    return;
+                }
+
+                ws.send(JSON.stringify({ type: "setPlaying", status: value, roomId: $roomId }));
+            }
+
+        });
+
     });
+
     $: $player?.onReady(() => {
         ws.send(JSON.stringify({ type: "setReady", roomId: $roomId }));
     })

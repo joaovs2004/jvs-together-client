@@ -69,20 +69,10 @@
 
     function onPlay() {
         playing.set(true);
-
-        if($ignoreNextEvent) {
-            ignoreNextEvent.set(false);
-            return;
-        }
     }
 
     function onPause() {
         playing.set(false);
-
-        if($ignoreNextEvent) {
-            ignoreNextEvent.set(false);
-            return;
-        }
     }
 
     onDestroy(() => {

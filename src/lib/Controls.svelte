@@ -35,12 +35,12 @@
         $playing ? $player.pause() : $player.play();
     }
 
-    function toggleFullscreen() {
+    async function toggleFullscreen() {
         if(!isFullScreen) {
             const screenSize = window.screen;
 
+            await playerContainer.requestFullscreen({navigationUI: "hide"});
             $player.resize(screenSize.width, screenSize.height);
-            playerContainer.requestFullscreen({navigationUI: "hide"});
         } else {
             document.exitFullscreen();
         }

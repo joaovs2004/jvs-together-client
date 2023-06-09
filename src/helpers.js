@@ -30,5 +30,6 @@ export async function getWorkingUrl(urls, fallback="https://w.wallhaven.cc/full/
 }
 
 export async function getWorkingYoutubeThumbUrl(videoId) {
-    return getWorkingUrl([`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`]);
+    return `https://vid.puffyan.us/vi/${videoId}/maxresdefault.jpg`;
+    // return getWorkingUrl([`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`]);
 }

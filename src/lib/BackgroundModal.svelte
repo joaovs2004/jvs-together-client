@@ -1,5 +1,4 @@
 <script>
-    import { getWorkingUrl } from "../helpers";
     import { backgroundImageUrl } from "../stores";
 
 	export let showModal;
@@ -23,10 +22,11 @@
                 const url = new URL(imageUrl);
                 const id = url.pathname.substring(3);
 
-
-				const imageLink = `https://w.wallhaven.cc/full/${id.substring(0, 2)}/wallhaven-${id}`
-                imageUrl = await getWorkingUrl([imageLink + ".jpg", imageLink + ".png"]);
-
+                imageUrl = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://wallhaven.cc/api/v1/w/' + id))
+					.then(value => value.json())
+					.then(data => {
+						return data.data.path;
+					});
             }
 
             localStorage.setItem("backgroundImageUrl", imageUrl);

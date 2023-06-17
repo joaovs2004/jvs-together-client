@@ -49,10 +49,6 @@
         display: inline-block;
     }
 
-    .form {
-        opacity: 0.70;
-    }
-
     input {
         width: 400px;
     }

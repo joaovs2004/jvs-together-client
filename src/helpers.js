@@ -1,4 +1,6 @@
 export function convertSeconds(time) {
+    if(!time) time = 3600;
+
     if(time < 3600) {
         return new Date(time * 1000).toISOString().substring(14, 19);
     } else {

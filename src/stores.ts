@@ -13,5 +13,6 @@ export const videoProps: any = writable({id: "cJtCyqB2uFg"});
 export const playbackrate = writable("1");
 export const history = writable([]);
 export const ignoreNextEvent = writable(false);
+export const waitingVideoSet = writable(false);
 
 export const backgroundImageUrl = writable();

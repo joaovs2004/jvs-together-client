@@ -1,5 +1,5 @@
 import { getWritableValue } from "./helpers";
-import { player, playerComponent, clientId, roomId, connectedClients, videoProps, playbackrate, history, ignoreNextEvent } from "./stores";
+import { player, playerComponent, clientId, roomId, connectedClients, videoProps, playbackrate, history, ignoreNextEvent, waitingVideoSet } from "./stores";
 import YoutubePlayer from './lib/players/YoutubePlayer.svelte';
 import DashPlayer from './lib/players/DASHPlayer.svelte';
 
@@ -36,5 +36,7 @@ ws.addEventListener("message", async (msg) => {
         playbackrate.set(String(message.rate));
     } else if(message.type == "updateHistory") {
         history.set(message.history);
+    } else if(message.type == "unlockSetVideo") {
+        waitingVideoSet.set(false);
     }
 });

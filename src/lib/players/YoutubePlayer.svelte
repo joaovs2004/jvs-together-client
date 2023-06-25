@@ -46,6 +46,10 @@
         player.setOption("captions", "track", {languageCode: language});
     }
 
+    export function setPlaybackRate(rate: number) {
+        player.setPlaybackRate(rate);
+    }
+
     function onPlayerReady(event) {
         player = event.detail.target;
         player.loadModule("captions");

@@ -49,6 +49,10 @@
 
     export function setCaption(language: string) {}
 
+    export function setPlaybackRate(rate: number) {
+        videoElement.playbackRate = rate;
+    }
+
     async function loadVideo () {
         if (!videoElement) return;
 

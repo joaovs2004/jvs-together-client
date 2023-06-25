@@ -8,6 +8,7 @@ export interface playerProvider {
     setVolume(volume: number);
     resize(width: number, height: number);
     setCaption(language: string);
+    setPlaybackRate(rate: number);
 
     playing: Writable<boolean>;
     currentTime: Writable<number>;

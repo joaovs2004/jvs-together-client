@@ -97,7 +97,11 @@
             </button>
 
             <span>{convertSeconds($currentTime)}/{convertSeconds($durationTime)}</span>
-            <input type="range" min=0 max=1000 step="1" on:change={seek} value={rangeValue}>
+
+            <div id="ranges-container">
+                <input type="range" min=0 max=1000 step="1" value={rangeValue}>
+                <input type="range" min=0 max=1000 step="1" id="dummy-range" value="0" on:change={seek}>
+            </div>
 
             <div class="right">
                 <CaptionsPopover on:change={e => $player.setOption("captions", "track", {languageCode: e.detail.languageCode})} />
@@ -140,10 +144,25 @@
         margin: auto 5px;
     }
 
-    input {
+    #ranges-container {
+        position: relative;
         width: auto;
         height: auto;
         flex-grow: 1;
+    }
+
+    #ranges-container > input[type="range"] {
+        width: 100%;
+        vertical-align: middle;
+    }
+
+    #ranges-container > #dummy-range {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        margin: 0 auto;
+        transform: translateY(-50%);
+        opacity: 0;
     }
 
     .right {

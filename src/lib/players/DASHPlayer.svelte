@@ -11,7 +11,7 @@
     let readyFunctions = [];
     let customWidth, customHeight = 0;
 
-    export const playing = writable(false);
+
     export const currentTime = writable(0);
     export const durationTime = writable(0);
     export const captions = writable([]);
@@ -27,6 +27,7 @@
     }
 
     export function play() {
+        console.trace("abc");
         videoElement.play();
     }
 
@@ -61,10 +62,8 @@
         player = new Shaka.Player(videoElement);
 
         player.addEventListener("error", e => console.error('Error code', e.detail.code, 'object', e.detail));
-        videoElement.addEventListener("play", () => playing.set(true));
-        videoElement.addEventListener("pause", () => playing.set(false));
         videoElement.addEventListener("timeupdate", e => currentTime.set(e.target.currentTime));
-        videoElement.addEventListener("canplay", e => {
+        videoElement.addEventListener("loadedmetadata", e => {
             durationTime.set(e.target.duration);
 
             for (const fn of readyFunctions)

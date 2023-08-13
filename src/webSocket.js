@@ -1,5 +1,5 @@
 import { getWritableValue } from "./helpers";
-import { player, playerComponent, clientId, roomId, connectedClients, videoProps, playbackrate, history, ignoreNextEvent, waitingVideoSet } from "./stores";
+import { player, playerComponent, clientId, roomId, connectedClients, videoProps, playbackrate, history, waitingVideoSet, playing } from "./stores";
 import YoutubePlayer from './lib/players/YoutubePlayer.svelte';
 import DashPlayer from './lib/players/DASHPlayer.svelte';
 
@@ -29,7 +29,7 @@ ws.addEventListener("message", async (msg) => {
     } else if(message.type == "seeked") {
         ytPlayer.seek(message.time);
     } else if(message.type == "setPlaying") {
-        ignoreNextEvent.set(true);
+        playing.set(message.status);
         message.status ? ytPlayer.play() : ytPlayer.pause();
     } else if(message.type == "setPlaybackRate") {
         ytPlayer.setPlaybackRate(message.rate);

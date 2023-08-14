@@ -7,6 +7,7 @@
 
     import { Play, Pause, Maximize2 } from "lucide-svelte";
     import CaptionsPopover from './CaptionsPopover.svelte';
+    import SeekBar from './SeekBar.svelte';
 
     let rangeValue = 0;
     let lastSubscription;
@@ -38,11 +39,11 @@
         ws.send(JSON.stringify({ type: "setReady", roomId: $roomId }));
     })
 
-    $: rangeValue = ($currentTime / $durationTime) * 1000;
+    $: rangeValue = $currentTime / $durationTime;
 
     function seek(e) {
-        $player.seek((e.target.value / 1000));
-        ws.send(JSON.stringify({ type: "seeked", time: e.target.value / 1000, roomId: $roomId }));
+        $player.seek(e.detail);
+        ws.send(JSON.stringify({ type: "seeked", time: e.detail, roomId: $roomId }));
     }
 
     function changePlayingState() {
@@ -97,7 +98,8 @@
             </button>
 
             <span>{convertSeconds($currentTime)}/{convertSeconds($durationTime)}</span>
-            <input type="range" min=0 max=1000 step="1" on:change={seek} value={rangeValue}>
+
+            <SeekBar value={rangeValue} duration={$durationTime} on:seek={seek}/>
 
             <div class="right">
                 <CaptionsPopover on:change={e => $player.setOption("captions", "track", {languageCode: e.detail.languageCode})} />

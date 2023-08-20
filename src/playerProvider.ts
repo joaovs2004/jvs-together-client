@@ -10,7 +10,6 @@ export interface playerProvider {
     setCaption(language: string);
     setPlaybackRate(rate: number);
 
-    playing: Writable<boolean>;
     currentTime: Writable<number>;
     durationTime: Writable<number>;
     captions: Writable<Array<any>>;

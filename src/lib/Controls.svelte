@@ -1,6 +1,6 @@
 <script lang="ts">
     import { convertSeconds } from '../helpers';
-    import { ignoreNextEvent, player, playerComponent, roomId } from '../stores';
+    import { player, playerComponent, playing, roomId } from '../stores';
     import { ws } from '../webSocket';
     import PlaybackPopover from './PlaybackPopover.svelte';
     import VolumePopover from './VolumePopover.svelte';
@@ -16,24 +16,7 @@
 
     let isFullScreen = false;
 
-    $: ({playing, currentTime, durationTime} = $player || {});
-    player.subscribe(value => {
-        if(!value) return;
-        if(lastSubscription) lastSubscription();
-
-        lastSubscription = value.playing?.subscribe(value => {
-            if(ws.readyState == 1) {
-                if($ignoreNextEvent) {
-                    ignoreNextEvent.set(false);
-                    return;
-                }
-
-                ws.send(JSON.stringify({ type: "setPlaying", status: value, roomId: $roomId }));
-            }
-
-        });
-
-    });
+    $: ({ currentTime, durationTime } = $player || {});
 
     $: $player?.onReady(() => {
         ws.send(JSON.stringify({ type: "setReady", roomId: $roomId }));
@@ -47,7 +30,8 @@
     }
 
     function changePlayingState() {
-        $playing ? $player.pause() : $player.play();
+        playing.set(!$playing);
+        ws.send(JSON.stringify({ type: "setPlaying", status: $playing, roomId: $roomId, broadcast: true }));
     }
 
     async function toggleFullscreen() {

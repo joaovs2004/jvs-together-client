@@ -1,6 +1,6 @@
 <script lang="ts">
     import YouTube from 'svelte-youtube';
-    import { ignoreNextEvent, roomId, videoProps } from '../../stores';
+    import { playing, roomId, videoProps } from '../../stores';
     import { writable } from 'svelte/store';
     import { onDestroy } from 'svelte';
 
@@ -8,8 +8,10 @@
     let ready = false;
     let readyFunctions = [];
     let updateInterval;
+    let dontIgnoreNextEvent = false;
 
-    export const playing = writable(false);
+    let lastPausedTime;
+
     export const currentTime = writable(0);
     export const durationTime = writable(0);
     export const captions = writable([]);
@@ -23,10 +25,14 @@
     }
 
     export function play() {
+        dontIgnoreNextEvent = true;
         player.playVideo();
     }
 
     export function pause() {
+        dontIgnoreNextEvent = true;
+        lastPausedTime = player.getCurrentTime();
+
         player.pauseVideo();
     }
 
@@ -35,7 +41,14 @@
     }
 
     export function seek(percentage: number) {
-        player.seekTo(player.playerInfo.duration * percentage);
+        let newTime = player.playerInfo.duration * percentage;
+        if($playing) {
+            dontIgnoreNextEvent = true
+        } else {
+            lastPausedTime = newTime;
+        }
+
+        player.seekTo(newTime);
     }
 
     export function resize(width: number, height: number) {
@@ -72,11 +85,28 @@
     }
 
     function onPlay() {
-        playing.set(true);
+        if(dontIgnoreNextEvent) {
+            dontIgnoreNextEvent = false;
+            return
+        }
+
+        dontIgnoreNextEvent = true;
+
+        player.pauseVideo();
+        setTimeout(() => {
+            player.seekTo(lastPausedTime);
+        }, 50);
     }
 
     function onPause() {
-        playing.set(false);
+        if(dontIgnoreNextEvent) {
+            dontIgnoreNextEvent = false;
+            return
+        }
+
+        dontIgnoreNextEvent = true;
+
+        player.playVideo();
     }
 
     onDestroy(() => {

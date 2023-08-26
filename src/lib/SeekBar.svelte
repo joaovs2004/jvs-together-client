@@ -95,6 +95,7 @@
         justify-content: center;
         align-items: center;
         padding: 0 10px;
+        cursor: pointer;
 
         & .bar {
             --bar-height: 4px;

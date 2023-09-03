@@ -12,6 +12,7 @@
 
 	if(previousBackgroundImage) {
 		backgroundImageUrl.set(previousBackgroundImage);
+		imageUrl = previousBackgroundImage;
 	}
 
 	let errorMessage;
@@ -38,6 +39,7 @@
     function resetBackgroundImage() {
         localStorage.removeItem("backgroundImageUrl");
         backgroundImageUrl.set(null);
+		imageUrl = "";
         dialog.close();
     }
 </script>
@@ -56,7 +58,9 @@
         <hr />
         <!-- svelte-ignore a11y-autofocus -->
 		<div id="buttons">
-            <button on:click={resetBackgroundImage}>Resetar</button>
+            <button on:click={resetBackgroundImage}>
+				{imageUrl ? "Resetar" : "Fechar"}
+			</button>
         	<button on:click={setBackgroundImage} class="btnPrimary">Confirmar</button>
 		</div>
 	</div>

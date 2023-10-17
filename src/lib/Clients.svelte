@@ -6,7 +6,7 @@
     <div id="usersContainer">
         {#each $connectedClients as client}
             <div>
-                <img src="https://avatars.dicebear.com/api/initials/{client}.svg" alt="avatar">
+                <img src="https://api.dicebear.com/7.x/initials/svg?seed={client}" alt="avatar">
                 <p title={client}>{client}</p>
             </div>
         {/each}

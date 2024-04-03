@@ -1,6 +1,6 @@
 <script>
 	import { ws } from "../webSocket";
-	import { clientId, roomId } from "../stores";
+	import { roomId } from "../stores";
 
 	export let showModal;
 
@@ -24,7 +24,7 @@
 		}
 
 		localStorage.setItem("previousName", name);
-		ws.send(JSON.stringify({ type: "setName", name: name, id: $clientId, roomId: $roomId }));
+		ws.send(JSON.stringify({ type: "setName", name: name, roomId: $roomId }));
 		dialog.close();
     }
 </script>

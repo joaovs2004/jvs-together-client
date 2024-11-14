@@ -3,6 +3,12 @@ import type { playerProvider } from "./playerProvider";
 import type { ComponentType, SvelteComponent } from "svelte";
 import YoutubePlayer from './lib/players/YoutubePlayer.svelte';
 
+export enum RewindStage {
+	NOT_REWINDING,
+	PAUSED,
+	REWINDING
+}
+
 export const player: Writable<playerProvider> = writable();
 export const playerComponent: Writable<ComponentType<SvelteComponent & playerProvider>> = writable(YoutubePlayer);
 export const playing: Writable<boolean> = writable(false);
@@ -12,5 +18,7 @@ export const videoProps: any = writable({id: "cJtCyqB2uFg"});
 export const playbackrate = writable("1");
 export const history = writable([]);
 export const waitingVideoSet = writable(false);
+export const currentRewindStage = writable<RewindStage>(RewindStage.NOT_REWINDING);
+export const rewindSelectionScreenOpen = writable(false);
 
 export const backgroundImageUrl = writable();

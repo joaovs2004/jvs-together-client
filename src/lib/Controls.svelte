@@ -1,6 +1,6 @@
 <script lang="ts">
     import { convertSeconds } from '../helpers';
-    import { player, playerComponent, playing, roomId } from '../stores';
+    import { currentRewindStage, player, playerComponent, playing, RewindStage, roomId } from '../stores';
     import { ws } from '../webSocket';
     import PlaybackPopover from './PlaybackPopover.svelte';
     import VolumePopover from './VolumePopover.svelte';
@@ -8,6 +8,7 @@
     import { Play, Pause, Maximize2 } from "lucide-svelte";
     import CaptionsPopover from './CaptionsPopover.svelte';
     import SeekBar from './SeekBar.svelte';
+    import RewindButton from './RewindButton.svelte';
 
     let rangeValue = 0;
     let lastSubscription;
@@ -30,6 +31,8 @@
     }
 
     function changePlayingState() {
+		if ($currentRewindStage !== RewindStage.NOT_REWINDING) return;
+
         playing.set(!$playing);
         ws.send(JSON.stringify({ type: "setPlaying", status: $playing, roomId: $roomId, broadcast: true }));
     }
@@ -69,7 +72,12 @@
 <svelte:window on:keydown={onKeyDown}/>
 
 <div id="playerContainer" bind:this={playerContainer} on:fullscreenchange={onFullscreenChange}>
-    <svelte:component this={$playerComponent} bind:this={$player} />
+	<div id="playbackContainer">
+		<svelte:component this={$playerComponent} bind:this={$player} />
+		<div id="rewindOverlay" class:show={$currentRewindStage === RewindStage.REWINDING}>
+			<p>REPLAY IMEDIATO</p>
+		</div>
+	</div>
 
     {#if $player}
         <div id="controls" class:fullscreen={isFullScreen}>
@@ -86,6 +94,7 @@
             <SeekBar value={rangeValue} duration={$durationTime} on:seek={seek}/>
 
             <div class="right">
+				<RewindButton/>
                 <CaptionsPopover on:change={e => $player.setOption("captions", "track", {languageCode: e.detail.languageCode})} />
                 <PlaybackPopover />
                 <VolumePopover />
@@ -99,6 +108,29 @@
     :global(#playerContainer > div:nth-child(1))  {
         height: 576px;
     }
+
+	#playbackContainer {
+		position: relative;
+
+		& > #rewindOverlay {
+			position: absolute;
+			display: none;
+			align-items: flex-end;
+			justify-content: center;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+
+			&.show { display: flex; }
+
+			& > p {
+				margin: 0;
+				color: white;
+				font-size: 70pt;
+			}
+		}
+	}
 
     #controls {
         display: flex;

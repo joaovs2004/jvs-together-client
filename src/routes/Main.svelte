@@ -10,6 +10,7 @@
     import BackgroundImage from "../lib/BackgroundImage.svelte";
     import { User, Image, History } from "lucide-svelte";
     import OffCanvas from "../lib/OffCanvas.svelte";
+    import RewindSelectionOverlay from "../lib/RewindSelectionOverlay.svelte";
 
     let showNameModal = true;
     let showBackgroundModal = false;
@@ -31,6 +32,7 @@
         <button on:click={() => isOffCanvasOpen = true} title="Ver historico de videos"><History size=22 /></button>
     </div>
 
+	<RewindSelectionOverlay/>
     <VideoChanger />
     <Youtube />
 

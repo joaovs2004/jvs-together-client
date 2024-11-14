@@ -1,5 +1,6 @@
+import { get as getStoreValue } from "svelte/store"
 import { getWritableValue } from "./helpers";
-import { player, playerComponent, roomId, connectedClients, videoProps, playbackrate, history, waitingVideoSet, playing } from "./stores";
+import { player, playerComponent, roomId, connectedClients, videoProps, playbackrate, history, waitingVideoSet, playing, currentRewindStage, RewindStage } from "./stores";
 import YoutubePlayer from './lib/players/YoutubePlayer.svelte';
 import DashPlayer from './lib/players/DASHPlayer.svelte';
 
@@ -39,5 +40,41 @@ ws.addEventListener("message", async (msg) => {
         history.set(message.history);
     } else if(message.type == "unlockSetVideo") {
         waitingVideoSet.set(false);
-    }
+    } else if (message.type == "rewind") {
+		const rewindSeconds = message.seconds;
+		const shouldAnnounce = message.shouldAnnounce;
+		const videoDuration = getStoreValue(ytPlayer.durationTime)
+		const currentTime = getStoreValue(ytPlayer.currentTime)
+		const seekTarget = Math.max(0, (currentTime - rewindSeconds) / videoDuration)
+
+		const doRewind = function() {
+			currentRewindStage.set(RewindStage.REWINDING)
+			ytPlayer.seek(seekTarget)
+
+			if (!getStoreValue(playing)) {
+				playing.set(true)
+				ytPlayer.play()
+			}
+
+			setTimeout(() => {
+				currentRewindStage.set(RewindStage.NOT_REWINDING)
+			}, rewindSeconds * 1000)
+		}
+
+		if (shouldAnnounce) {
+			playing.set(false)
+			ytPlayer.pause();
+			currentRewindStage.set(RewindStage.PAUSED)
+
+			const audio = new Audio("https://audio.jukehost.co.uk/bvdt4TAH0AMN4yftOjySCPZSFe8HkxSe")
+			const audio_duration = 6.51 // seconds
+
+			audio.volume = Number(localStorage.getItem("previousVolume")) / 100
+			audio.play()
+
+			setTimeout(doRewind, audio_duration * 1000)
+		} else {
+			doRewind()
+		}
+	}
 });

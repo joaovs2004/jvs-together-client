@@ -9,6 +9,7 @@
     import CaptionsPopover from './CaptionsPopover.svelte';
     import SeekBar from './SeekBar.svelte';
     import RewindButton from './RewindButton.svelte';
+    import RewindSelectionOverlay from './RewindSelectionOverlay.svelte';
 
     let rangeValue = 0;
     let lastSubscription;
@@ -26,6 +27,8 @@
     $: rangeValue = $currentTime / $durationTime;
 
     function seek(e) {
+		if ($currentRewindStage !== RewindStage.NOT_REWINDING) return;
+
         $player.seek(e.detail);
         ws.send(JSON.stringify({ type: "seeked", time: e.detail, roomId: $roomId }));
     }
@@ -74,10 +77,13 @@
 <div id="playerContainer" bind:this={playerContainer} on:fullscreenchange={onFullscreenChange}>
 	<div id="playbackContainer">
 		<svelte:component this={$playerComponent} bind:this={$player} />
+
 		<div id="rewindOverlay" class:show={$currentRewindStage === RewindStage.REWINDING}>
 			<p>REPLAY IMEDIATO</p>
 		</div>
 	</div>
+
+	<RewindSelectionOverlay/>
 
     {#if $player}
         <div id="controls" class:fullscreen={isFullScreen}>
@@ -105,10 +111,6 @@
 </div>
 
 <style>
-    :global(#playerContainer > div:nth-child(1))  {
-        height: 576px;
-    }
-
 	#playbackContainer {
 		position: relative;
 
@@ -117,10 +119,9 @@
 			display: none;
 			align-items: flex-end;
 			justify-content: center;
-			top: 0;
+			bottom: 0;
 			left: 0;
 			width: 100%;
-			height: 100%;
 
 			&.show { display: flex; }
 

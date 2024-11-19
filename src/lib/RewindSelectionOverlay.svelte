@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { rewindSelectionScreenOpen, roomId } from "../stores"
+	import { currentRewindStage, rewindSelectionScreenOpen, RewindStage, roomId } from "../stores"
     import { ws } from "../webSocket";
 
 	const OPTIONS = [5, 10, 15, 30];
 	let selectedSeconds = 0;
 
 	function performRewind(seconds: number) {
+		if ($currentRewindStage !== RewindStage.NOT_REWINDING) return;
+
 		ws.send(JSON.stringify({ type: "rewind", roomId: $roomId, seconds: seconds }))
 	}
 

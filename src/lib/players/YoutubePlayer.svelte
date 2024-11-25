@@ -41,7 +41,7 @@
     }
 
     export function seek(percentage: number) {
-        let newTime = player.playerInfo.duration * percentage;
+        let newTime = player.getDuration() * percentage;
         if($playing) {
             dontIgnoreNextEvent = true
         } else {
@@ -69,7 +69,7 @@
 
         updateInterval = setInterval(() => {
             currentTime.set(player.getCurrentTime());
-            durationTime.set(player.playerInfo.duration);
+            durationTime.set(player.getDuration());
 
             player.loadModule("captions");
             captions.set(player.getOption("captions", "tracklist"));

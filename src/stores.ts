@@ -7,7 +7,6 @@ export const player: Writable<playerProvider> = writable();
 export const playerComponent: Writable<ComponentType<SvelteComponent & playerProvider>> = writable(YoutubePlayer);
 export const playing: Writable<boolean> = writable(false);
 export const roomId = writable();
-export const clientId = writable();
 export const connectedClients = writable();
 export const videoProps: any = writable({id: "cJtCyqB2uFg"});
 export const playbackrate = writable("1");

@@ -122,6 +122,7 @@
 			bottom: 0;
 			left: 0;
 			width: 100%;
+			user-select: none;
 
 			&.show { display: flex; }
 

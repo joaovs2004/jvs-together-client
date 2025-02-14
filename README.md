@@ -1,47 +1,56 @@
-# Svelte + Vite
+# Jvs Together Client
 
-This template should help get you started developing with Svelte in Vite.
+This is a project that allows users to watch YouTube videos simultaneously with others. This project is inspired by the Watch2Gether website. The front-end of the app is built with Svelte and the websocket is built with Rust.
 
-## Recommended IDE Setup
+## Features
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- **Real-time Video Sync:** Watch YouTube videos at the same time as other users.
+- **Video Control:** Pause, play, skip, and adjust video speed with others in real time.
+- **Multiple Users:** Enter in a room with your friends to watch videos together.
+- **Multiple rooms**: Multiple rooms available. Each one is independent from the others, videos in one room do not affect the others.
 
-## Need an official Svelte framework?
+## How to test
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+The project is available to test in https://joaovs.v6.navy/<desired_room>
 
-## Technical considerations
+Replace <desired_room> with the room you want to enter
 
-**Why use this over SvelteKit?**
+Example: https://joaovs.v6.navy/room1
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+Rooms are created automatically when you enter
 
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+## Tech Stack
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+- **Frontend:** Svelte
+- **Backend:** [WebSocket written in Rust](https://github.com/joaovs2004/jvs-together-websocket)
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+## How to run on your local machine
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+### Prerequisites
 
-**Why include `.vscode/extensions.json`?**
+Before you begin, ensure you have the following:
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+- **Node.js**
+- **npm**
+- **Run the WebSocket server available at https://github.com/joaovs2004/jvs-together-websocket**
 
-**Why enable `checkJs` in the JS template?**
+### Installing
 
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/joaovs2004/jvs-together-client
+   cd jvs-together-client
+    ```
+2. Create .env with the url of WebSocket server
+    ```bash
+    # If you followed the steps of https://github.com/joaovs2004/jvs-together-client
+    # The server will be at ws://localhost:9001
+    echo 'VITE_WS_URL=ws://localhost:9001' > .env
+    echo 'VITE_WS_URL=ws://localhost:9001' > .env.production
+    ```
+3. Run the project with:
+    ```bash
+    npm run dev
+    ```
 
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+Now you can acess http://localhost:5173/<desired_room> and test the project

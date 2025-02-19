@@ -1,56 +1,50 @@
-# Jvs Together Client
+# React + TypeScript + Vite
 
-This is a project that allows users to watch YouTube videos simultaneously with others. This project is inspired by the Watch2Gether website. The front-end of the app is built with Svelte and the websocket is built with Rust.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
+Currently, two official plugins are available:
 
-- **Real-time Video Sync:** Watch YouTube videos at the same time as other users.
-- **Video Control:** Pause, play, skip, and adjust video speed with others in real time.
-- **Multiple Users:** Enter in a room with your friends to watch videos together.
-- **Multiple rooms**: Multiple rooms available. Each one is independent from the others, videos in one room do not affect the others.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## How to test
+## Expanding the ESLint configuration
 
-The project is available to test in https://joaovs.v6.navy/<desired_room>
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-Replace <desired_room> with the room you want to enter
+- Configure the top-level `parserOptions` property like this:
 
-Example: https://joaovs.v6.navy/room1
+```js
+export default tseslint.config({
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
+```
 
-Rooms are created automatically when you enter
+- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
+- Optionally add `...tseslint.configs.stylisticTypeChecked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-## Tech Stack
+```js
+// eslint.config.js
+import react from 'eslint-plugin-react'
 
-- **Frontend:** Svelte
-- **Backend:** [WebSocket written in Rust](https://github.com/joaovs2004/jvs-together-websocket)
-
-## How to run on your local machine
-
-### Prerequisites
-
-Before you begin, ensure you have the following:
-
-- **Node.js**
-- **npm**
-- **Run the WebSocket server available at https://github.com/joaovs2004/jvs-together-websocket**
-
-### Installing
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/joaovs2004/jvs-together-client
-   cd jvs-together-client
-    ```
-2. Create .env with the url of WebSocket server
-    ```bash
-    # If you followed the steps of https://github.com/joaovs2004/jvs-together-client
-    # The server will be at ws://localhost:9001
-    echo 'VITE_WS_URL=ws://localhost:9001' > .env
-    echo 'VITE_WS_URL=ws://localhost:9001' > .env.production
-    ```
-3. Run the project with:
-    ```bash
-    npm run dev
-    ```
-
-Now you can acess http://localhost:5173/<desired_room> and test the project
+export default tseslint.config({
+  // Set the react version
+  settings: { react: { version: '18.3' } },
+  plugins: {
+    // Add the react plugin
+    react,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended rules
+    ...react.configs.recommended.rules,
+    ...react.configs['jsx-runtime'].rules,
+  },
+})
+```

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import screenfull from 'screenfull'
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -23,22 +23,37 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { SendMessage } from 'react-use-websocket';
+import YouTubePlayer from 'react-player/youtube';
+
+interface YoutubePlayerControlsProps {
+  player: YouTubePlayer | null;
+  isPlaying: boolean;
+  duration: number;
+  volume: number;
+  currentTime: number;
+  setCurrentTime: Dispatch<SetStateAction<number>>;
+  setVolume: Dispatch<SetStateAction<number>>;
+  onPlayButtonClick: () => void;
+}
 
 export default function YoutubePlayerControls(
-  { isPlaying, onPlayButtonClick }: {
-    isPlaying: boolean,
-    onPlayButtonClick: () => void,
-  }
+  {
+    player,
+    isPlaying,
+    duration,
+    volume,
+    currentTime,
+    setCurrentTime,
+    setVolume,
+    onPlayButtonClick
+  }:
+  YoutubePlayerControlsProps
 ) {
-  const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(300); // Example: 5 minutes
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Format time as MM:SS
-  const formatTime = (seconds) => {
+  function formatTime(seconds: number) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
@@ -48,8 +63,9 @@ export default function YoutubePlayerControls(
     document.addEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  const handleVolumeChange = (value) => {
+  function handleVolumeChange(value) {
     setVolume(value[0]);
+
     if (value[0] === 0) {
       setIsMuted(true);
     } else if (isMuted) {
@@ -57,8 +73,9 @@ export default function YoutubePlayerControls(
     }
   };
 
-  const handleSeek = (value) => {
+  function handleSeek(value) {
     setCurrentTime(value[0]);
+    player?.seekTo(value)
   };
 
   const toggleMute = () => {
@@ -131,8 +148,8 @@ export default function YoutubePlayerControls(
               <Slider
                 value={[isMuted ? 0 : volume]}
                 min={0}
-                max={100}
-                step={1}
+                max={1}
+                step={0.01}
                 onValueChange={handleVolumeChange}
                 className="w-20"
               />
@@ -177,7 +194,7 @@ export default function YoutubePlayerControls(
                     onClick={toggleFullscreen}
                     className="text-white hover:bg-white hover:bg-opacity-20 fullScreen"
                   >
-                  <Maximize size={18} />
+                  {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

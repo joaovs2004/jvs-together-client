@@ -1,20 +1,36 @@
 import { Card, CardContent } from '@/components/ui/card';
 import ReactPlayer from 'react-player/youtube';
 import YoutubePlayerControls from './controls';
-import { SendMessage } from 'react-use-websocket';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import YouTubePlayer from 'react-player/youtube';
+import { useWebSocketContext } from '@/websocket-context';
 
-export default function Player({ sendMessageFunction }: {sendMessageFunction: SendMessage}) {
+export default function Player({ room_id }: { room_id: string }) {
   const [player, setPlayer] = useState<YouTubePlayer | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoDuration, setVideoDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(50);
 
+  const { sendMessage, lastMessage } = useWebSocketContext();
+
+  useEffect(() => {
+    const messageData = lastMessage?.data;
+
+    if (messageData) {
+      const jsonMessageData = JSON.parse(messageData);
+
+      if (jsonMessageData.type == "setPlaying") {
+        setIsVideoPlaying(jsonMessageData.status);
+      } else if(jsonMessageData.type == "seeked") {
+        player?.seekTo(jsonMessageData.time);
+      }
+    }
+  }, [lastMessage]);
+
   function handlePlayPause() {
-    setIsVideoPlaying(!isVideoPlaying);
-    sendMessageFunction(JSON.stringify({ type: "setPlaying", status: isVideoPlaying, roomId: "teste", broadcast: true }));
+    const isPlaying = !isVideoPlaying;
+    sendMessage(JSON.stringify({ type: "setPlaying", status: isPlaying, roomId: "teste", broadcast: true }));
   };
 
   return (
@@ -31,10 +47,11 @@ export default function Player({ sendMessageFunction }: {sendMessageFunction: Se
               playing={isVideoPlaying}
               volume={volume}
               onDuration={(duration) => { setVideoDuration(duration) }}
-              onProgress={(a) => {setCurrentTime(a.playedSeconds)}}
+              onProgress={(progress) => {setCurrentTime(progress.playedSeconds)}}
             />
           </div>
             <YoutubePlayerControls
+              room_id={room_id}
               player={player}
               isPlaying={isVideoPlaying}
               duration={videoDuration}

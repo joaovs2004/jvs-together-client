@@ -11,16 +11,18 @@ import { useState } from 'react';
 import { User } from 'lucide-react';
 import { DialogClose } from '@radix-ui/react-dialog';
 import { SendMessage } from 'react-use-websocket';
+import { useWebSocketContext } from '@/websocket-context';
 
-export default function UsernameChanger({ sendMessageFunction }: {sendMessageFunction: SendMessage}) {
+export default function UsernameChanger({ room_id }: { room_id: string }) {
   const [username, setUsername] = useState('Anonymous');
+  const { sendMessage, lastMessage, readyState } = useWebSocketContext();
 
   function handleUsernameChange(newUsername: string) {
     setUsername(newUsername);
   };
 
   function confirmUsernameChange() {
-    sendMessageFunction(JSON.stringify({ type: "setName", name: username, roomId: "teste" }));
+    sendMessage(JSON.stringify({ type: "setName", name: username, roomId: room_id }));
   }
 
   return (

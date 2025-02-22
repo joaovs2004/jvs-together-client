@@ -24,8 +24,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import YouTubePlayer from 'react-player/youtube';
+import { useWebSocketContext } from '@/websocket-context';
 
 interface YoutubePlayerControlsProps {
+  room_id: string;
   player: YouTubePlayer | null;
   isPlaying: boolean;
   duration: number;
@@ -38,6 +40,7 @@ interface YoutubePlayerControlsProps {
 
 export default function YoutubePlayerControls(
   {
+    room_id,
     player,
     isPlaying,
     duration,
@@ -51,6 +54,7 @@ export default function YoutubePlayerControls(
 ) {
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { sendMessage } = useWebSocketContext();
 
   // Format time as MM:SS
   function formatTime(seconds: number) {
@@ -74,9 +78,13 @@ export default function YoutubePlayerControls(
   };
 
   function handleSeek(value) {
-    setCurrentTime(value[0]);
-    player?.seekTo(value)
+    setCurrentTime(value[0])
+    player?.seekTo(value[0])
   };
+
+  function sendSeek() {
+    sendMessage(JSON.stringify({ type: "seeked", time: currentTime, roomId: room_id }));
+  }
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
@@ -111,6 +119,7 @@ export default function YoutubePlayerControls(
             max={duration}
             step={1}
             onValueChange={handleSeek}
+            onValueCommit={sendSeek}
             className="flex-1"
           />
           <span className="text-xs">{formatTime(duration)}</span>

@@ -1,7 +1,24 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { useWebSocketContext } from '@/websocket-context';
 import { Users, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-export default function ConnectedUsers({ connectedUsers }: { connectedUsers: string[] }) {
+export default function ConnectedUsers() {
+  const { sendMessage, lastMessage, readyState } = useWebSocketContext();
+  const [connectedUsers, setConnectedUsers] = useState(Array<String>());
+
+  useEffect(() => {
+    const messageData = lastMessage?.data;
+
+    if (messageData) {
+      const jsonMessageData = JSON.parse(messageData);
+
+      if (jsonMessageData.type == "connectedClients") {
+        setConnectedUsers(jsonMessageData.clients);
+      }
+    }
+  }, [lastMessage]);
+
   return (
     <div className="lg:col-span-1">
       <Card className="bg-white border-gray-200 dark:bg-zinc-900 dark:border-zinc-800">

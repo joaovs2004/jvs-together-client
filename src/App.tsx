@@ -18,7 +18,7 @@ export default function YoutubeSyncPlayer() {
               <UsernameChanger room_id={room_id} />
             </div>
 
-            <VideoChanger/>
+            <VideoChanger room_id={room_id} />
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <Player room_id={room_id} />

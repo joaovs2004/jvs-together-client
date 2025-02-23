@@ -4,8 +4,8 @@ import { Users, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function ConnectedUsers() {
-  const { sendMessage, lastMessage, readyState } = useWebSocketContext();
-  const [connectedUsers, setConnectedUsers] = useState(Array<String>());
+  const { lastMessage } = useWebSocketContext();
+  const [connectedUsers, setConnectedUsers] = useState(Array<string>());
 
   useEffect(() => {
     const messageData = lastMessage?.data;

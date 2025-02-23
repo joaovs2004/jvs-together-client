@@ -1,10 +1,11 @@
-import React, { createContext, useContext, ReactNode, JSX, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, JSX, useEffect, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 interface WebSocketContextType {
   sendMessage: (message: string) => void;
   lastMessage: MessageEvent | null;
   readyState: ReadyState;
+  isInRoom: boolean;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
@@ -16,9 +17,11 @@ interface WebSocketProviderProps {
 
 export function WebSocketProvider({ children, room_id }: WebSocketProviderProps): JSX.Element {
   const { sendMessage, lastMessage, readyState } = useWebSocket("ws://localhost:9001");
+  const [isInRoom, setIsInRoom] = useState(false);
 
   useEffect(() => {
     sendMessage(JSON.stringify({type: "sendToRoom", roomId: room_id}));
+    setIsInRoom(true);
   }, []);
 
   useEffect(() => {
@@ -32,10 +35,11 @@ export function WebSocketProvider({ children, room_id }: WebSocketProviderProps)
       }
     }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage]);
 
   return (
-    <WebSocketContext.Provider value={{ sendMessage, lastMessage, readyState }}>
+    <WebSocketContext.Provider value={{ sendMessage, lastMessage, readyState, isInRoom }}>
       {children}
     </WebSocketContext.Provider>
   );

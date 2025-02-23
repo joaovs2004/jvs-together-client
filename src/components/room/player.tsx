@@ -11,6 +11,7 @@ export default function Player({ room_id }: { room_id: string }) {
   const [videoDuration, setVideoDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(50);
+  const [videoUrl, setVideoUrl] = useState("https://www.youtube.com/watch?v=LXb3EKWsInQ");
 
   const { sendMessage, lastMessage } = useWebSocketContext();
 
@@ -24,8 +25,11 @@ export default function Player({ room_id }: { room_id: string }) {
         setIsVideoPlaying(jsonMessageData.status);
       } else if(jsonMessageData.type == "seeked") {
         player?.seekTo(jsonMessageData.time);
+      } else if(jsonMessageData.type == "setVideo") {
+        setVideoUrl(`https://www.youtube.com/watch?v=${jsonMessageData.videoId}`);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage]);
 
   function handlePlayPause() {
@@ -43,7 +47,7 @@ export default function Player({ room_id }: { room_id: string }) {
               ref={(ref) => {setPlayer(ref)}}
               width="100%"
               height="100%"
-              url='https://www.youtube.com/watch?v=LXb3EKWsInQ'
+              url={videoUrl}
               playing={isVideoPlaying}
               volume={volume}
               onDuration={(duration) => { setVideoDuration(duration) }}

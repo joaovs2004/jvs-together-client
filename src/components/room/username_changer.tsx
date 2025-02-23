@@ -22,6 +22,7 @@ export default function UsernameChanger({ room_id }: { room_id: string }) {
 
     if (previousUsername && isInRoom) {
       setUsername(previousUsername);
+      setInputUsername(previousUsername);
       sendMessage(JSON.stringify({ type: "setName", name: previousUsername, roomId: room_id }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

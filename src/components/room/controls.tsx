@@ -1,5 +1,4 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import screenfull from 'screenfull'
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +8,7 @@ import {
   VolumeX,
   Maximize,
   Minimize,
-  Settings
+  Clock
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,6 +51,7 @@ export default function YoutubePlayerControls(
   }:
   YoutubePlayerControlsProps
 ) {
+  const videoSpeeds = [0.25, 0.5, 0.75, 1, 1.5, 1.75, 2];
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { sendMessage } = useWebSocketContext();
@@ -101,6 +101,10 @@ export default function YoutubePlayerControls(
     setIsMuted(!isMuted);
   };
 
+  function handleVideoSpeedChange(speed: number) {
+    sendMessage(JSON.stringify({ type: "setPlaybackRate", rate: speed, roomId: room_id, broadcast: true }));
+  }
+
   function handleFullscreenChange() {
     if (document.fullscreenElement) {
       setIsFullscreen(true);
@@ -108,6 +112,7 @@ export default function YoutubePlayerControls(
       setIsFullscreen(false);
     }
   };
+
 
   function toggleFullscreen() {
     const player = document.querySelector('.player');
@@ -187,7 +192,7 @@ export default function YoutubePlayerControls(
                         size="icon"
                         className="text-white hover:bg-white hover:bg-opacity-20"
                       >
-                        <Settings size={18} />
+                        <Clock size={18} />
                       </Button>
                     </DropdownMenuTrigger>
                   </TooltipTrigger>
@@ -197,11 +202,9 @@ export default function YoutubePlayerControls(
                 </Tooltip>
               </TooltipProvider>
               <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => console.log("Speed 0.25x")}>0.25x</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => console.log("Speed 0.5x")}>0.5x</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => console.log("Speed 1x")}>Normal (1x)</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => console.log("Speed 1.5x")}>1.5x</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => console.log("Speed 2x")}>2x</DropdownMenuItem>
+                {videoSpeeds.map((speed) => (
+                  <DropdownMenuItem onSelect={() => handleVideoSpeedChange(speed)}>{speed}</DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 

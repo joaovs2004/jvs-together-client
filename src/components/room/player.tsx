@@ -9,6 +9,7 @@ export default function Player({ room_id }: { room_id: string }) {
   const [player, setPlayer] = useState<YouTubePlayer | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [videoSpeed, setVideoSpeed] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(50);
   const [videoUrl, setVideoUrl] = useState("https://www.youtube.com/watch?v=LXb3EKWsInQ");
@@ -27,6 +28,8 @@ export default function Player({ room_id }: { room_id: string }) {
         player?.seekTo(jsonMessageData.time);
       } else if(jsonMessageData.type == "setVideo") {
         setVideoUrl(`https://www.youtube.com/watch?v=${jsonMessageData.videoId}`);
+      } else if(jsonMessageData.type == "setPlaybackRate") {
+        setVideoSpeed(jsonMessageData.rate);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,6 +53,7 @@ export default function Player({ room_id }: { room_id: string }) {
               url={videoUrl}
               playing={isVideoPlaying}
               volume={volume}
+              playbackRate={videoSpeed}
               onDuration={(duration) => { setVideoDuration(duration) }}
               onProgress={(progress) => {setCurrentTime(progress.playedSeconds)}}
             />

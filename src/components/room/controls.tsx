@@ -56,6 +56,14 @@ export default function YoutubePlayerControls(
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { sendMessage } = useWebSocketContext();
 
+  useEffect(() => {
+    const previousVolume = localStorage.getItem("previousVolume");
+
+    if (previousVolume) {
+      setVolume(Number(previousVolume));
+    }
+  }, []);
+
   // Format time as MM:SS
   function formatTime(seconds: number) {
     const minutes = Math.floor(seconds / 60);
@@ -67,8 +75,11 @@ export default function YoutubePlayerControls(
     document.addEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  function handleVolumeChange(value) {
-    setVolume(value[0]);
+  function handleVolumeChange(value: number[]) {
+    const newVolume = value[0];
+    setVolume(newVolume);
+
+    localStorage.setItem("previousVolume", newVolume.toString());
 
     if (value[0] === 0) {
       setIsMuted(true);
@@ -77,7 +88,7 @@ export default function YoutubePlayerControls(
     }
   };
 
-  function handleSeek(value) {
+  function handleSeek(value: number[]) {
     setCurrentTime(value[0])
     player?.seekTo(value[0])
   };

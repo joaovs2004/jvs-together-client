@@ -34,7 +34,7 @@ export default function Player({ room_id }: { room_id: string }) {
 
   function handlePlayPause() {
     const isPlaying = !isVideoPlaying;
-    sendMessage(JSON.stringify({ type: "setPlaying", status: isPlaying, roomId: "teste", broadcast: true }));
+    sendMessage(JSON.stringify({ type: "setPlaying", status: isPlaying, roomId: room_id, broadcast: true }));
   };
 
   return (

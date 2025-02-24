@@ -52,6 +52,7 @@ export default function YoutubePlayerControls(
   YoutubePlayerControlsProps
 ) {
   const videoSpeeds = [0.25, 0.5, 0.75, 1, 1.5, 1.75, 2];
+  const [previousVolume, setPreviousVolume] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSeekbarTooltip, setShowSeekbarTooltip] = useState(false);
@@ -62,8 +63,14 @@ export default function YoutubePlayerControls(
 
   useEffect(() => {
     const previousVolume = localStorage.getItem("previousVolume");
+    const isMuted = localStorage.getItem("isMuted");
 
-    if (previousVolume) {
+    if (previousVolume) setPreviousVolume(Number(previousVolume));
+
+    if (isMuted) {
+      setVolume(0);
+      setIsMuted(true);
+    } else if (previousVolume) {
       setVolume(Number(previousVolume));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,8 +110,17 @@ export default function YoutubePlayerControls(
     sendMessage(JSON.stringify({ type: "seeked", time: currentTime, roomId: room_id }));
   }
 
-  const toggleMute = () => {
+  function toggleMute() {
     setIsMuted(!isMuted);
+
+    localStorage.setItem("isMuted", isMuted ? "true" : "false");
+
+    if (!isMuted) {
+      setPreviousVolume(volume);
+      setVolume(0);
+    } else {
+      setVolume(previousVolume);
+    }
   };
 
   function handleVideoSpeedChange(speed: number) {
@@ -202,7 +218,7 @@ export default function YoutubePlayerControls(
                 variant="ghost"
                 size="icon"
                 onClick={toggleMute}
-                className="text-white hover:bg-white hover:bg-opacity-20"
+                className="text-white hover:bg-white hover:bg-opacity-20 cursor-pointer"
               >
                 {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
               </Button>
@@ -212,7 +228,7 @@ export default function YoutubePlayerControls(
                 max={1}
                 step={0.01}
                 onValueChange={handleVolumeChange}
-                className="w-20"
+                className="w-20 cursor-pointer"
               />
             </div>
           </div>
@@ -238,8 +254,8 @@ export default function YoutubePlayerControls(
                 </Tooltip>
               </TooltipProvider>
               <DropdownMenuContent>
-                {videoSpeeds.map((speed) => (
-                  <DropdownMenuItem onSelect={() => handleVideoSpeedChange(speed)}>{speed}</DropdownMenuItem>
+                {videoSpeeds.map((speed, index) => (
+                  <DropdownMenuItem key={index} onSelect={() => handleVideoSpeedChange(speed)}>{speed}</DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>

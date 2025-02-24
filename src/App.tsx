@@ -10,6 +10,8 @@ export default function YoutubeSyncPlayer() {
   const params = useParams();
   const room_id = params.room_id;
 
+  if (!room_id) return;
+
   return (
     <WebSocketProvider room_id={room_id}>
       <div className="dark">

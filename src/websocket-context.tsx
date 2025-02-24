@@ -22,6 +22,7 @@ export function WebSocketProvider({ children, room_id }: WebSocketProviderProps)
   useEffect(() => {
     sendMessage(JSON.stringify({type: "sendToRoom", roomId: room_id}));
     setIsInRoom(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

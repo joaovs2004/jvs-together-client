@@ -28,6 +28,8 @@ export default function Player({ room_id }: { room_id: string }) {
         player?.seekTo(jsonMessageData.time);
       } else if(jsonMessageData.type == "setVideo") {
         setVideoUrl(`https://www.youtube.com/watch?v=${jsonMessageData.videoId}`);
+        setIsVideoPlaying(true);
+        sendMessage(JSON.stringify({ type: "setPlaying", status: true, roomId: room_id, broadcast: true }));
       } else if(jsonMessageData.type == "setPlaybackRate") {
         setVideoSpeed(jsonMessageData.rate);
       }

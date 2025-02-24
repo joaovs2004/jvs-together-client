@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +54,10 @@ export default function YoutubePlayerControls(
   const videoSpeeds = [0.25, 0.5, 0.75, 1, 1.5, 1.75, 2];
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showSeekbarTooltip, setShowSeekbarTooltip] = useState(false);
+  const [seekbarTooltipValue, setSeekbarTooltipValue] = useState(0);
+  const [seekbarTooltipPosition, setSeekbarTooltipPosition] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
   const { sendMessage } = useWebSocketContext();
 
   useEffect(() => {
@@ -62,6 +66,7 @@ export default function YoutubePlayerControls(
     if (previousVolume) {
       setVolume(Number(previousVolume));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Format time as MM:SS
@@ -89,6 +94,7 @@ export default function YoutubePlayerControls(
   };
 
   function handleSeek(value: number[]) {
+    setShowSeekbarTooltip(false);
     setCurrentTime(value[0])
     player?.seekTo(value[0])
   };
@@ -113,7 +119,6 @@ export default function YoutubePlayerControls(
     }
   };
 
-
   function toggleFullscreen() {
     const player = document.querySelector('.player');
 
@@ -124,20 +129,51 @@ export default function YoutubePlayerControls(
     }
   };
 
+  function handleSeekbarTooltip(event: React.MouseEvent) {
+    if (!sliderRef.current) return;
+
+    const rect = sliderRef.current.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const percentage = Math.min(Math.max((x / rect.width) * 100, 0), 100);
+    const hoverTime = Math.round((percentage / 100) * duration);
+
+    setSeekbarTooltipValue(hoverTime);
+    setSeekbarTooltipPosition(percentage);
+  }
+
   return (
     <div className={`w-full bg-black bg-opacity-80 p-2 text-white controls ${isFullscreen ? 'fullscreen' : ''}`}>
       <div className="w-full flex flex-col gap-2">
         <div className="flex items-center gap-2 w-full">
           <span className="text-xs">{formatTime(currentTime)}</span>
-          <Slider
-            value={[currentTime]}
-            min={0}
-            max={duration}
-            step={1}
-            onValueChange={handleSeek}
-            onValueCommit={sendSeek}
-            className="flex-1"
-          />
+
+          <div
+            className="relative w-full cursor-pointer"
+            ref={sliderRef}
+            onMouseMove={(event) => handleSeekbarTooltip(event)}
+            onMouseEnter={() => setShowSeekbarTooltip(true)}
+            onMouseLeave={() => setShowSeekbarTooltip(false)}
+          >
+            {showSeekbarTooltip && (
+              <div
+                className="absolute -top-2 transform -translate-y-full bg-black text-white px-2 py-1 rounded text-sm"
+                style={{ left: `${seekbarTooltipPosition}%`, transform: 'translateX(-50%)' }}
+              >
+                {formatTime(seekbarTooltipValue)}
+              </div>
+            )}
+
+            <Slider
+              value={[currentTime]}
+              min={0}
+              max={duration}
+              step={1}
+              onValueChange={handleSeek}
+              onValueCommit={sendSeek}
+              className="flex-1"
+            />
+          </div>
+
           <span className="text-xs">{formatTime(duration)}</span>
         </div>
 

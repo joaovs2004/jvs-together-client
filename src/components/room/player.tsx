@@ -44,7 +44,7 @@ export default function Player({ room_id }: { room_id: string }) {
     <div className="lg:col-span-3">
       <Card className="bg-white rounded-none border-gray-200 dark:bg-zinc-900 dark:border-zinc-800 player">
         <CardContent className="p-0">
-          <div className="aspect-video bg-gray-100 dark:bg-zinc-900 flex items-center justify-center text-gray-800 dark:text-zinc-100">
+          <div className="aspect-video bg-gray-100 dark:bg-zinc-900 flex items-center justify-center text-gray-800 dark:text-zinc-100 pointer-events-none">
             <ReactPlayer
               className='react-player'
               ref={(ref) => {setPlayer(ref)}}

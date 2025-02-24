@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, JSX, useEffect, useState } from 'react';
+import { createContext, useContext, ReactNode, JSX, useEffect, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 interface WebSocketContextType {
@@ -16,7 +16,7 @@ interface WebSocketProviderProps {
 }
 
 export function WebSocketProvider({ children, room_id }: WebSocketProviderProps): JSX.Element {
-  const { sendMessage, lastMessage, readyState } = useWebSocket("ws://localhost:9001");
+  const { sendMessage, lastMessage, readyState } = useWebSocket(import.meta.env.VITE_WS_URL);
   const [isInRoom, setIsInRoom] = useState(false);
 
   useEffect(() => {

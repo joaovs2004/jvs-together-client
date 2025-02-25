@@ -67,7 +67,7 @@ export default function YoutubePlayerControls(
 
     if (previousVolume) setPreviousVolume(Number(previousVolume));
 
-    if (isMuted) {
+    if (isMuted == "true") {
       setVolume(0);
       setIsMuted(true);
     } else if (previousVolume) {
@@ -113,7 +113,7 @@ export default function YoutubePlayerControls(
   function toggleMute() {
     setIsMuted(!isMuted);
 
-    localStorage.setItem("isMuted", isMuted ? "true" : "false");
+    localStorage.setItem("isMuted", !isMuted ? "true" : "false");
 
     if (!isMuted) {
       setPreviousVolume(volume);

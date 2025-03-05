@@ -9,6 +9,13 @@ This is a project that allows users to watch YouTube videos simultaneously with 
 - **Multiple Users:** Enter in a room with your friends to watch videos together.
 - **Multiple rooms**: Multiple rooms available. Each one is independent from the others, videos in one room do not affect the others.
 
+## Project demonstration
+
+
+https://github.com/user-attachments/assets/3e4b504f-d051-486f-bc68-a9f9f7d571b4
+
+
+
 ## How to test
 
 The project is available to test in https://joaovs.v6.navy/<desired_room>

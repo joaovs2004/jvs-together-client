@@ -56,7 +56,7 @@ export default function Player({ room_id }: { room_id: string }) {
               playing={isVideoPlaying}
               volume={volume}
               playbackRate={videoSpeed}
-              onDuration={(duration) => { setVideoDuration(duration) }}
+              onReady={() => { if (player) setVideoDuration(player.getDuration()); }}
               onProgress={(progress) => {setCurrentTime(progress.playedSeconds)}}
             />
           </div>

@@ -46,16 +46,24 @@ export default function Player({ room_id }: { room_id: string }) {
     <div className="lg:col-span-3">
       <Card className="bg-white rounded-none border-gray-200 dark:bg-zinc-900 dark:border-zinc-800 player">
         <CardContent className="p-0">
-          <div className="aspect-video bg-gray-100 dark:bg-zinc-900 flex items-center justify-center text-gray-800 dark:text-zinc-100 pointer-events-none">
+          <div className="aspect-video bg-gray-100 dark:bg-zinc-900 flex items-center justify-center text-gray-800 dark:text-zinc-100">
             <ReactPlayer
               className='react-player'
-              ref={(ref) => {setPlayer(ref)}}
+              ref={(ref) => { setPlayer(ref) }}
               width="100%"
               height="100%"
               url={videoUrl}
               playing={isVideoPlaying}
               volume={volume}
               playbackRate={videoSpeed}
+              onPlay={() => {
+                setIsVideoPlaying(true);
+                sendMessage(JSON.stringify({ type: "setPlaying", status: true, roomId: room_id, broadcast: true }));
+              }}
+              onPause={() => {
+                setIsVideoPlaying(false);
+                sendMessage(JSON.stringify({ type: "setPlaying", status: false, roomId: room_id, broadcast: true }));
+              }}
               onReady={() => { if (player) setVideoDuration(player.getDuration()); }}
               onProgress={(progress) => {setCurrentTime(progress.playedSeconds)}}
             />

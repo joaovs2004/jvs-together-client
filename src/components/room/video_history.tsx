@@ -31,6 +31,7 @@ export default function VideoHistory({ room_id }: { room_id: string }) {
         setVideoHistory(jsonMessageData.history);
       }     
     }
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage]);
 
@@ -58,11 +59,11 @@ export default function VideoHistory({ room_id }: { room_id: string }) {
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-80px)] mt-6">
           <div className="space-y-4 cursor-pointer" >
-            {videoHistory.reverse().map((video: videoHistoryItem, index) => (
+            {[...videoHistory].slice().reverse().map((video: videoHistoryItem) => (
               <div 
                 className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => handleOnOldVideoClick(video.url)}
-                key={index}
+                key={video.videoId}
               >
                 <div className="flex-shrink-0 relative w-24 h-16 rounded-md overflow-hidden">
                   <img

@@ -76,12 +76,18 @@ export default function YoutubePlayerControls(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Format time as MM:SS
+  // Format time as HH:MM:SS
   function formatTime(seconds: number) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  };
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+
+    const hoursField = hrs > 0 ? `${hrs}:` : '';
+    const minutesField = hrs > 0 ? String(mins).padStart(2, '0') : String(mins);
+    const secondsField = String(secs).padStart(2, '0');
+
+    return `${hoursField}${minutesField}:${secondsField}`;
+  }
 
   useEffect(() => {
     document.addEventListener('fullscreenchange', handleFullscreenChange);

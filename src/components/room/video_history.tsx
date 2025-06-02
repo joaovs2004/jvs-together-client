@@ -28,6 +28,7 @@ export default function VideoHistory({ room_id }: { room_id: string }) {
       const jsonMessageData = JSON.parse(messageData);
 
       if (jsonMessageData.type == "updateHistory") {
+        console.log(jsonMessageData.history);
         setVideoHistory(jsonMessageData.history);
       }     
     }
@@ -59,11 +60,11 @@ export default function VideoHistory({ room_id }: { room_id: string }) {
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-80px)] mt-6">
           <div className="space-y-4 cursor-pointer" >
-            {[...videoHistory].slice().reverse().map((video: videoHistoryItem) => (
+            {[...videoHistory].slice().reverse().map((video: videoHistoryItem, index) => (
               <div 
                 className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => handleOnOldVideoClick(video.url)}
-                key={video.videoId}
+                key={video.videoId + index}
               >
                 <div className="flex-shrink-0 relative w-24 h-16 rounded-md overflow-hidden">
                   <img

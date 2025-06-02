@@ -47,7 +47,7 @@ export default function YoutubePlayerControls(
     currentTime,
     setCurrentTime,
     setVolume,
-    onPlayButtonClick
+    onPlayButtonClick,
   }:
   YoutubePlayerControlsProps
 ) {
@@ -62,6 +62,7 @@ export default function YoutubePlayerControls(
   const { sendMessage } = useWebSocketContext();
 
   useEffect(() => {
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
     const previousVolume = localStorage.getItem("previousVolume");
     const isMuted = localStorage.getItem("isMuted");
 
@@ -76,6 +77,13 @@ export default function YoutubePlayerControls(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyBindings);
+    return () => {
+      document.removeEventListener('keydown', handleKeyBindings);
+    };
+  }, [handleKeyBindings]);
+
   // Format time as HH:MM:SS
   function formatTime(seconds: number) {
     const hrs = Math.floor(seconds / 3600);
@@ -89,9 +97,16 @@ export default function YoutubePlayerControls(
     return `${hoursField}${minutesField}:${secondsField}`;
   }
 
-  useEffect(() => {
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+  function handleKeyBindings(event: KeyboardEvent) {
+    switch (event.key) {
+      case "f":
+        toggleFullscreen();
+        break;
+      case " ":
+        onPlayButtonClick();
+        break;
+    }
+  }
 
   function handleVolumeChange(value: number[]) {
     const newVolume = value[0];
@@ -145,7 +160,7 @@ export default function YoutubePlayerControls(
     const player = document.querySelector('.player');
 
     if (!isFullscreen) {
-      player?.requestFullscreen({navigationUI: "hide"})
+      player?.requestFullscreen({navigationUI: "hide"});
     } else {
       document.exitFullscreen();
     }
@@ -209,6 +224,11 @@ export default function YoutubePlayerControls(
                     size="icon"
                     onClick={onPlayButtonClick}
                     className="text-white hover:bg-white hover:bg-opacity-20"
+                    onKeyDown={(e) => {
+                      if (e.code === "Space") {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     {isPlaying ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
                   </Button>

@@ -18,11 +18,11 @@ https://github.com/user-attachments/assets/3e4b504f-d051-486f-bc68-a9f9f7d571b4
 
 ## How to test
 
-The project is available to test in https://joaovs.site/<desired_room>
+The project is available to test in https://together.joaovs.site/<desired_room>
 
 Replace <desired_room> with the room you want to enter
 
-Example: https://joaovs.site/room1
+Example: https://together.joaovs.site/room1
 
 Rooms are created automatically when you enter
 

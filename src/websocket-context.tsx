@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode, JSX, useEffect, useState } from 'react';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { ReadyState } from 'react-use-websocket';
+import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 
 interface WebSocketContextType {
   sendMessage: (message: string) => void;
@@ -20,9 +21,9 @@ export function WebSocketProvider({ children, room_id }: WebSocketProviderProps)
   const [isInRoom, setIsInRoom] = useState(false);
 
   useEffect(() => {
-    sendMessage(JSON.stringify({type: "sendToRoom", roomId: room_id}));
+    sendMessage(JSON.stringify({ type: "sendToRoom", roomId: room_id }));
     setIsInRoom(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -32,11 +33,11 @@ export function WebSocketProvider({ children, room_id }: WebSocketProviderProps)
       const jsonMessageData = JSON.parse(messageData);
 
       if (jsonMessageData.type == "ping") {
-        sendMessage(JSON.stringify({"type": "pong"}));
+        sendMessage(JSON.stringify({ "type": "pong" }));
       }
     }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage]);
 
   return (

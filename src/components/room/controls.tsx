@@ -8,10 +8,12 @@ import {
   VolumeX,
   Maximize,
   Minimize,
-  Clock
+  Clock,
+  Captions
 } from "lucide-react";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import YouTubePlayer from 'react-player/youtube';
 import { useWebSocketContext } from '@/websocket-context';
+import type { CaptionTrack } from './player';
 
 interface YoutubePlayerControlsProps {
   room_id: string;
@@ -34,6 +37,9 @@ interface YoutubePlayerControlsProps {
   currentTime: number;
   setCurrentTime: Dispatch<SetStateAction<number>>;
   setVolume: Dispatch<SetStateAction<number>>;
+  captionTracks: CaptionTrack[];
+  selectedCaptionLanguage: string | null;
+  onCaptionChange: (languageCode: string | null) => void;
   onPlayButtonClick: () => void;
 }
 
@@ -47,6 +53,9 @@ export default function YoutubePlayerControls(
     currentTime,
     setCurrentTime,
     setVolume,
+    captionTracks,
+    selectedCaptionLanguage,
+    onCaptionChange,
     onPlayButtonClick,
   }:
   YoutubePlayerControlsProps
@@ -260,6 +269,48 @@ export default function YoutubePlayerControls(
           </div>
 
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Selecionar legenda"
+                        className="text-white hover:bg-white hover:bg-opacity-20"
+                      >
+                        <Captions size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Legendas</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <DropdownMenuContent className="max-h-[min(20rem,calc(100vh-1rem))] overflow-y-auto">
+                <DropdownMenuCheckboxItem
+                  checked={selectedCaptionLanguage === null}
+                  onSelect={() => onCaptionChange(null)}
+                >
+                  Desativadas
+                </DropdownMenuCheckboxItem>
+                {captionTracks.map((track) => (
+                  <DropdownMenuCheckboxItem
+                    key={track.languageCode}
+                    checked={selectedCaptionLanguage === track.languageCode}
+                    onSelect={() => onCaptionChange(track.languageCode)}
+                  >
+                    {track.name || track.languageName || track.languageCode}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                {captionTracks.length === 0 && (
+                  <DropdownMenuItem disabled>Nenhuma legenda disponível</DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <DropdownMenu>
               <TooltipProvider>
                 <Tooltip>

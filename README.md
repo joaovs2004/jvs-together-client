@@ -61,3 +61,19 @@ Before you begin, ensure you have the following:
     ```
 
 Now you can acess http://localhost:5173/<desired_room> and test the project
+
+### Running with Docker
+
+Build the image, passing the URL of the WebSocket server:
+
+```bash
+docker build --build-arg VITE_WS_URL=ws://localhost:9001 -t jvs-together-client .
+```
+
+Start the container:
+
+```bash
+docker run --rm -p 8080:80 jvs-together-client
+```
+
+Then access http://localhost:8080/<desired_room>. The WebSocket server must be running separately and accessible from the browser at the URL passed to `VITE_WS_URL`.

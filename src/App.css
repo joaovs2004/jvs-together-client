@@ -1,0 +1,24 @@
+#root { min-height: 100vh; }
+.room-shell { min-height: 100vh; color: #f3f4f6; background: radial-gradient(ellipse at 50% -20%, #1e3040 0, #111a23 40%, #0b1016 80%); padding: 0 5vw; }
+.room-header { height: 76px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #26313b; }
+.room-brand, .room-actions { display: flex; align-items: center; gap: 16px; }
+.room-brand strong, .room-brand small { display: block; }
+.room-brand strong { font-size: 15px; letter-spacing: .02em; }
+.room-brand small { color: #8d9aa7; font-size: 11px; margin-top: 2px; }
+.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: #24b47e; color: #061a13; font-weight: 800; font-size: 20px; }
+.room-badge, .live-badge { display: inline-flex; align-items: center; gap: 8px; color: #a9b5c0; font-size: 12px; }
+.room-badge { border: 1px solid #2c3843; border-radius: 20px; padding: 8px 12px; }
+.room-badge i, .live-badge i { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #28c990; box-shadow: 0 0 10px #28c99088; }
+.room-layout { max-width: 1440px; margin: 0 auto; padding: 42px 0; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 26px; align-items: start; }
+.watch-column { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.room-title { display: flex; justify-content: space-between; align-items: end; }
+.room-title h1 { margin: 5px 0 0; font-size: clamp(23px, 3vw, 34px); letter-spacing: -.04em; font-weight: 650; }
+.eyebrow { color: #2ac994; font-size: 10px; letter-spacing: .18em; font-weight: 700; }
+.live-badge { color: #31d39a; font-size: 10px; letter-spacing: .1em; font-weight: 700; padding-bottom: 5px; }
+.room-sidebar { padding-top: 88px; }
+.room-sidebar > div { grid-column: auto !important; }
+.room-sidebar [class*="border-gray-200"] { border-color: #27333d; background: #121a22; border-radius: 14px; }
+.room-footer { max-width: 1440px; margin: 0 auto; border-top: 1px solid #202b35; padding: 18px 0 24px; color: #778490; font-size: 12px; }
+.react-player iframe { border: 0; }
+@media (max-width: 900px) { .room-layout { grid-template-columns: 1fr; padding: 26px 0; } .room-sidebar { padding-top: 0; } }
+@media (max-width: 600px) { .room-shell { padding: 0 16px; } .room-header { height: 66px; } .room-actions { gap: 7px; } .room-badge { display: none; } .room-title { align-items: center; } }

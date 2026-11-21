@@ -16,18 +16,21 @@ export default function YoutubeSyncPlayer() {
     <WebSocketProvider room_id={room_id}>
       <div className="dark">
         <div className="min-h-screen min-w-screen transition-colors duration-200 dark:bg-zinc-950">
-          <div className="max-w-7xl mx-auto p-4 space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <UsernameChanger room_id={room_id} />
-              <VideoHistory room_id={room_id} />
-            </div>
+          <div className="room-shell">
+            <header className="room-header">
+              <div className="room-brand"><span className="brand-mark">J</span><div><strong>Jvs Together</strong><small>Watch together</small></div></div>
+              <div className="room-actions"><span className="room-badge"><i /> Room {room_id}</span><UsernameChanger room_id={room_id} /><VideoHistory room_id={room_id} /></div>
+            </header>
 
-            <VideoChanger room_id={room_id} />
-
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-              <Player room_id={room_id} />
-              <ConnectedUsers />
-            </div>
+            <main className="room-layout">
+              <section className="watch-column">
+                <div className="room-title"><div><span className="eyebrow">WATCH PARTY</span><h1>Watching together</h1></div><span className="live-badge"><i /> LIVE ROOM</span></div>
+                <VideoChanger room_id={room_id} />
+                <Player room_id={room_id} />
+              </section>
+              <aside className="room-sidebar"><ConnectedUsers /></aside>
+            </main>
+            <footer className="room-footer">A shared room for videos, wherever you are.</footer>
           </div>
         </div>
       </div>

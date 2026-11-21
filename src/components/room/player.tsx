@@ -1,15 +1,14 @@
 import { Card, CardContent } from '@/components/ui/card';
-import ReactPlayer from 'react-player/youtube';
 import YoutubePlayerControls from './controls';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import YouTubePlayer from 'react-player/youtube';
 import { useWebSocketContext } from '@/websocket-context';
 
-export interface CaptionTrack {
-  languageCode: string;
-  languageName?: string;
-  name?: string;
-}
+export interface CaptionTrack { languageCode: string; languageName?: string; name?: string }
+type YTPlayer = YouTubePlayer & { getPlayerState: () => number; getPlaybackRate: () => number; setPlaybackRate: (rate: number) => void; playVideo: () => void; pauseVideo: () => void };
+type SyncState = { position: number; status: boolean; rate: number };
+const SMALL_DRIFT = 1.5;
+const LARGE_DRIFT = 5;
 
 export default function Player({ room_id }: { room_id: string }) {
   const [player, setPlayer] = useState<YouTubePlayer | null>(null);
@@ -18,152 +17,120 @@ export default function Player({ room_id }: { room_id: string }) {
   const [videoSpeed, setVideoSpeed] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(50);
-  const [videoUrl, setVideoUrl] = useState("https://www.youtube.com/watch?v=LXb3EKWsInQ");
-  const [captionTracks, setCaptionTracks] = useState<CaptionTrack[]>([]);
-  const [selectedCaptionLanguage, setSelectedCaptionLanguage] = useState<string | null>(null);
-  const captionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const captionVideoUrlRef = useRef<string | null>(null);
-
+  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=LXb3EKWsInQ');
+  const [captionTracks] = useState<CaptionTrack[]>([]);
+  const [selectedCaptionLanguage] = useState<string | null>(null);
+  const correctionRef = useRef(false);
+  const pendingSyncRef = useRef<SyncState | null>(null);
+  const lastSentPlayingRef = useRef<boolean | null>(null);
   const { sendMessage, lastMessage } = useWebSocketContext();
 
-  useEffect(() => {
-    const messageData = lastMessage?.data;
-
-    if (messageData) {
-      const jsonMessageData = JSON.parse(messageData);
-
-      if (jsonMessageData.type == "setPlaying") {
-        setIsVideoPlaying(jsonMessageData.status);
-      } else if (jsonMessageData.type == "seeked") {
-        player?.seekTo(jsonMessageData.time);
-      } else if (jsonMessageData.type == "setVideo") {
-        setVideoUrl(`https://www.youtube.com/watch?v=${jsonMessageData.videoId}`);
-        setIsVideoPlaying(true);
-        sendMessage(JSON.stringify({ type: "setPlaying", status: true, roomId: room_id, broadcast: true }));
-      } else if (jsonMessageData.type == "setPlaybackRate") {
-        setVideoSpeed(jsonMessageData.rate);
-      }
+  const applySyncState = useCallback((state: SyncState) => {
+    const target = player as YTPlayer | null;
+    if (!target) { pendingSyncRef.current = state; return; }
+    pendingSyncRef.current = null;
+    correctionRef.current = true;
+    const drift = state.position - target.getCurrentTime();
+    if (Math.abs(drift) > LARGE_DRIFT) {
+      target.seekTo(state.position, 'seconds');
+      target.setPlaybackRate(state.rate);
+    } else if (Math.abs(drift) > SMALL_DRIFT && state.status) {
+      target.setPlaybackRate(Math.min(2, Math.max(0.25, state.rate + Math.sign(drift) * 0.15)));
+    } else {
+      target.setPlaybackRate(state.rate);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastMessage]);
+    const currentlyPlaying = target.getPlayerState() === 1;
+    if (state.status !== currentlyPlaying) {
+      state.status ? target.playVideo() : target.pauseVideo();
+    }
+    setIsVideoPlaying(state.status);
+    setVideoSpeed(state.rate);
+    window.setTimeout(() => { correctionRef.current = false; }, 900);
+  }, [player]);
 
-  useEffect(() => () => {
-    if (captionTimerRef.current) clearTimeout(captionTimerRef.current);
-  }, []);
+  useEffect(() => {
+    const data = lastMessage?.data;
+    if (!data) return;
+    try {
+      const message = JSON.parse(data);
+      if (message.type === 'setPlaying') {
+        const status = Boolean(message.status);
+        setIsVideoPlaying(status);
+        const target = player as YTPlayer | null;
+        if (target && (target.getPlayerState() === 1) !== status) {
+          correctionRef.current = true;
+          status ? target.playVideo() : target.pauseVideo();
+          window.setTimeout(() => { correctionRef.current = false; }, 900);
+        }
+      } else if (message.type === 'seeked') {
+        correctionRef.current = true;
+        player?.seekTo(message.time, 'seconds');
+        window.setTimeout(() => { correctionRef.current = false; }, 900);
+      } else if (message.type === 'syncState') {
+        if (Number.isFinite(message.position) && Number.isFinite(message.rate)) {
+          applySyncState({ position: message.position, status: Boolean(message.status), rate: message.rate });
+        }
+      } else if (message.type === 'setVideo') {
+        const nextUrl = message.url || `https://www.youtube.com/watch?v=${message.videoId}`;
+        setVideoUrl(nextUrl);
+        setIsVideoPlaying(true);
+        sendMessage(JSON.stringify({ type: 'setPlaying', status: true, roomId: room_id, broadcast: true }));
+      } else if (message.type === 'setPlaybackRate') {
+        setVideoSpeed(message.rate);
+        const target = player as YTPlayer | null;
+        if (target && target.getPlaybackRate() !== message.rate) target.setPlaybackRate(message.rate);
+      }
+    } catch { /* Ignore malformed websocket payloads. */ }
+  }, [lastMessage, player, room_id, sendMessage, applySyncState]);
+
+  useEffect(() => {
+    if (player && pendingSyncRef.current) applySyncState(pendingSyncRef.current);
+  }, [player, applySyncState]);
 
   function handlePlayPause() {
-    const isPlaying = !isVideoPlaying;
-    sendMessage(JSON.stringify({ type: "setPlaying", status: isPlaying, roomId: room_id, broadcast: true }));
-  };
-
-  function prepareCaptions(readyPlayer: Pick<ReactPlayer, 'getInternalPlayer'>) {
-    const youtubePlayer = readyPlayer.getInternalPlayer();
-    if (!youtubePlayer) return;
-
-    if (captionTimerRef.current) clearTimeout(captionTimerRef.current);
-
-    // Do not let the embedded YouTube player restore its own caption preference.
-    youtubePlayer.unloadModule?.('captions');
-    setCaptionTracks([]);
-    setSelectedCaptionLanguage(null);
-    youtubePlayer.loadModule?.('captions');
-
-    const findTracks = (attempt = 0) => {
-      const tracks = youtubePlayer.getOption?.('captions', 'tracklist');
-
-      if (Array.isArray(tracks)) {
-        setCaptionTracks(tracks);
-        youtubePlayer.unloadModule?.('captions');
-        return;
-      }
-
-      // The captions module is initialized by YouTube shortly after the video starts.
-      if (attempt < 10) {
-        captionTimerRef.current = setTimeout(() => findTracks(attempt + 1), 300);
-      } else {
-        youtubePlayer.unloadModule?.('captions');
-      }
-    };
-
-    captionTimerRef.current = setTimeout(findTracks, 300);
-  }
-
-  function handleCaptionChange(languageCode: string | null) {
-    const youtubePlayer = player?.getInternalPlayer();
-    if (!youtubePlayer) return;
-
-    if (languageCode) {
-      youtubePlayer.loadModule?.('captions');
-      youtubePlayer.setOption?.('captions', 'track', { languageCode });
-    } else {
-      youtubePlayer.unloadModule?.('captions');
-    }
-
-    setSelectedCaptionLanguage(languageCode);
-  }
-
-  function keepCaptionsDisabled() {
-    if (selectedCaptionLanguage !== null) return;
-
-    const youtubePlayer = player?.getInternalPlayer();
-    youtubePlayer?.unloadModule?.('captions');
+    const status = !isVideoPlaying;
+    sendMessage(JSON.stringify({ type: 'setPlaying', status, roomId: room_id, broadcast: true }));
   }
 
   return (
     <div className="lg:col-span-3">
       <Card className="bg-white rounded-none border-gray-200 dark:bg-zinc-900 dark:border-zinc-800 player">
         <CardContent className="p-0">
-          <div className="aspect-video bg-gray-100 dark:bg-zinc-900 flex items-center justify-center text-gray-800 dark:text-zinc-100">
-            <ReactPlayer
-              className='react-player'
-              ref={(ref) => { setPlayer(ref) }}
+          <div className="aspect-video bg-black overflow-hidden">
+            <YouTubePlayer
+              className="react-player"
+              ref={setPlayer}
               width="100%"
               height="100%"
               url={videoUrl}
               playing={isVideoPlaying}
-              volume={volume}
+              volume={volume / 100}
               playbackRate={videoSpeed}
-              config={{ playerVars: { cc_load_policy: 0 } }}
+              config={{ playerVars: { cc_load_policy: 0, origin: window.location.origin } }}
               onPlay={() => {
-                keepCaptionsDisabled();
                 setIsVideoPlaying(true);
-                sendMessage(JSON.stringify({ type: "setPlaying", status: true, roomId: room_id, broadcast: true }));
+                if (!correctionRef.current && lastSentPlayingRef.current !== true) {
+                  lastSentPlayingRef.current = true;
+                  sendMessage(JSON.stringify({ type: 'setPlaying', status: true, roomId: room_id, broadcast: true }));
+                }
               }}
               onPause={() => {
                 setIsVideoPlaying(false);
-                sendMessage(JSON.stringify({ type: "setPlaying", status: false, roomId: room_id, broadcast: true }));
+                if (!correctionRef.current && lastSentPlayingRef.current !== false) {
+                  lastSentPlayingRef.current = false;
+                  sendMessage(JSON.stringify({ type: 'setPlaying', status: false, roomId: room_id, broadcast: true }));
+                }
               }}
               onReady={(readyPlayer) => {
                 setVideoDuration(readyPlayer.getDuration());
-                captionVideoUrlRef.current = videoUrl;
-                prepareCaptions(readyPlayer);
+                if (pendingSyncRef.current) applySyncState(pendingSyncRef.current);
               }}
-              onProgress={(progress) => {
-                setCurrentTime(progress.playedSeconds);
-
-                if (captionVideoUrlRef.current !== videoUrl) {
-                  captionVideoUrlRef.current = videoUrl;
-                  if (player) prepareCaptions(player);
-                }
-              }}
+              onProgress={(progress) => setCurrentTime(progress.playedSeconds)}
             />
           </div>
-          <YoutubePlayerControls
-            room_id={room_id}
-            player={player}
-            isPlaying={isVideoPlaying}
-            duration={videoDuration}
-            volume={volume}
-            currentTime={currentTime}
-            setCurrentTime={setCurrentTime}
-            setVolume={setVolume}
-            captionTracks={captionTracks}
-            selectedCaptionLanguage={selectedCaptionLanguage}
-            onCaptionChange={handleCaptionChange}
-            onPlayButtonClick={handlePlayPause}
-          />
+          <YoutubePlayerControls room_id={room_id} player={player} isPlaying={isVideoPlaying} duration={videoDuration} volume={volume} currentTime={currentTime} setCurrentTime={setCurrentTime} setVolume={setVolume} captionTracks={captionTracks} selectedCaptionLanguage={selectedCaptionLanguage} onCaptionChange={() => undefined} onPlayButtonClick={handlePlayPause} />
         </CardContent>
       </Card>
     </div>
   );
-};
+}

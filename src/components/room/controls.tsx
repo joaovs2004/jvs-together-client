@@ -260,8 +260,8 @@ export default function YoutubePlayerControls(
               <Slider
                 value={[isMuted ? 0 : volume]}
                 min={0}
-                max={1}
-                step={0.01}
+                max={100}
+                step={1}
                 onValueChange={handleVolumeChange}
                 className="w-20 cursor-pointer"
               />

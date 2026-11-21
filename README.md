@@ -9,6 +9,16 @@ This is a project that allows users to watch YouTube videos simultaneously with 
 - **Multiple Users:** Enter in a room with your friends to watch videos together.
 - **Multiple rooms**: Multiple rooms available. Each one is independent from the others, videos in one room do not affect the others.
 
+## WebSocket playback synchronization protocol
+
+The client keeps the explicit `seeked` message for user initiated seeks. To synchronize playback without repeatedly jumping the video, the server should send periodic room broadcasts with this payload:
+
+```json
+{"type":"syncState","position":42.5,"status":true,"rate":1,"roomId":"room1"}
+```
+
+`position` is the current playback time in seconds, `status` is a boolean (`true` for playing), and `rate` is the playback rate. The client uses playback-rate correction for small drift and seeks only when drift is over five seconds. The server must reserve `seeked` for explicit user seeks and must not encode periodic position updates as `seeked`. If the current WebSocket server does not emit `syncState`, it needs this change to support smooth periodic synchronization; this client repository does not contain the server implementation.
+
 ## Project demonstration
 
 

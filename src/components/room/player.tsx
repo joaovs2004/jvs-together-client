@@ -1,5 +1,3 @@
-import { Card, CardContent } from '@/components/ui/card';
-import YoutubePlayerControls from './controls';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import YouTubePlayer from 'react-player/youtube';
 import { useWebSocketContext } from '@/websocket-context';
@@ -13,13 +11,8 @@ const LARGE_DRIFT = 5;
 export default function Player({ room_id }: { room_id: string }) {
   const [player, setPlayer] = useState<YouTubePlayer | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [videoDuration, setVideoDuration] = useState(0);
   const [videoSpeed, setVideoSpeed] = useState(1);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [volume, setVolume] = useState(50);
   const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=LXb3EKWsInQ');
-  const [captionTracks] = useState<CaptionTrack[]>([]);
-  const [selectedCaptionLanguage] = useState<string | null>(null);
   const correctionRef = useRef(false);
   const pendingSyncRef = useRef<SyncState | null>(null);
   const lastSentPlayingRef = useRef<boolean | null>(null);
@@ -87,16 +80,8 @@ export default function Player({ room_id }: { room_id: string }) {
     if (player && pendingSyncRef.current) applySyncState(pendingSyncRef.current);
   }, [player, applySyncState]);
 
-  function handlePlayPause() {
-    const status = !isVideoPlaying;
-    sendMessage(JSON.stringify({ type: 'setPlaying', status, roomId: room_id, broadcast: true }));
-  }
-
   return (
-    <div className="lg:col-span-3">
-      <Card className="bg-white rounded-none border-gray-200 dark:bg-zinc-900 dark:border-zinc-800 player">
-        <CardContent className="p-0">
-          <div className="aspect-video bg-black overflow-hidden">
+    <div className="youtube-player-frame">
             <YouTubePlayer
               className="react-player"
               ref={setPlayer}
@@ -104,9 +89,8 @@ export default function Player({ room_id }: { room_id: string }) {
               height="100%"
               url={videoUrl}
               playing={isVideoPlaying}
-              volume={volume / 100}
               playbackRate={videoSpeed}
-              config={{ playerVars: { cc_load_policy: 0, origin: window.location.origin } }}
+              config={{ playerVars: { controls: 1, cc_load_policy: 0, origin: window.location.origin, playsinline: 1 } }}
               onPlay={() => {
                 setIsVideoPlaying(true);
                 if (!correctionRef.current && lastSentPlayingRef.current !== true) {
@@ -121,16 +105,21 @@ export default function Player({ room_id }: { room_id: string }) {
                   sendMessage(JSON.stringify({ type: 'setPlaying', status: false, roomId: room_id, broadcast: true }));
                 }
               }}
-              onReady={(readyPlayer) => {
-                setVideoDuration(readyPlayer.getDuration());
+              onReady={(_readyPlayer) => {
                 if (pendingSyncRef.current) applySyncState(pendingSyncRef.current);
               }}
-              onProgress={(progress) => setCurrentTime(progress.playedSeconds)}
+              onSeek={(time) => {
+                if (!correctionRef.current) {
+                  sendMessage(JSON.stringify({ type: 'seeked', time, roomId: room_id }));
+                }
+              }}
+              onRateChange={(rate: number) => {
+                if (!correctionRef.current) {
+                  setVideoSpeed(rate);
+                  sendMessage(JSON.stringify({ type: 'setPlaybackRate', rate, roomId: room_id, broadcast: true }));
+                }
+              }}
             />
-          </div>
-          <YoutubePlayerControls room_id={room_id} player={player} isPlaying={isVideoPlaying} duration={videoDuration} volume={volume} currentTime={currentTime} setCurrentTime={setCurrentTime} setVolume={setVolume} captionTracks={captionTracks} selectedCaptionLanguage={selectedCaptionLanguage} onCaptionChange={() => undefined} onPlayButtonClick={handlePlayPause} />
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import UsernameChanger from './components/room/username_changer';
 import { WebSocketProvider } from './websocket-context';
 import { useParams } from 'react-router';
 import VideoHistory from './components/room/video_history';
+import { Menu, MessageSquare, Settings, Share2 } from 'lucide-react';
 
 export default function YoutubeSyncPlayer() {
   const params = useParams();
@@ -17,20 +18,28 @@ export default function YoutubeSyncPlayer() {
       <div className="dark">
         <div className="min-h-screen min-w-screen transition-colors duration-200 dark:bg-zinc-950">
           <div className="room-shell">
-            <header className="room-header">
-              <div className="room-brand"><span className="brand-mark">J</span><div><strong>Jvs Together</strong><small>Watch together</small></div></div>
-              <div className="room-actions"><span className="room-badge"><i /> Room {room_id}</span><UsernameChanger room_id={room_id} /><VideoHistory room_id={room_id} /></div>
+            <header className="sync-topbar">
+              <button className="topbar-icon" aria-label="Menu"><Menu size={20} /></button>
+              <a className="sync-logo" href="#"><span>SYNC</span><b>▶</b><span>TUBE</span></a>
+              <button className="topbar-icon share-room" aria-label="Compartilhar sala"><Share2 size={17} /></button>
+              <div className="topbar-media"><VideoChanger room_id={room_id} /></div>
+              <div className="topbar-right">
+                <VideoHistory room_id={room_id} />
+                <button className="topbar-tab active"><MessageSquare size={14} /> Chat</button>
+                <UsernameChanger room_id={room_id} />
+              </div>
             </header>
 
-            <main className="room-layout">
-              <section className="watch-column">
-                <div className="room-title"><div><span className="eyebrow">WATCH PARTY</span><h1>Watching together</h1></div><span className="live-badge"><i /> LIVE ROOM</span></div>
-                <VideoChanger room_id={room_id} />
-                <Player room_id={room_id} />
-              </section>
-              <aside className="room-sidebar"><ConnectedUsers /></aside>
+            <main className="sync-room-layout">
+              <section className="sync-video-column"><Player room_id={room_id} /></section>
+              <aside className="sync-chat-panel">
+                <div className="chat-heading"><MessageSquare size={16} /><strong>Chat</strong><span>Room {room_id}</span></div>
+                <div className="chat-spacer" />
+                <div className="chat-composer"><span>Chat is not enabled yet</span><button aria-label="Enviar mensagem" disabled>➤</button></div>
+                <ConnectedUsers />
+              </aside>
             </main>
-            <footer className="room-footer">A shared room for videos, wherever you are.</footer>
+            <button className="settings-float" aria-label="Configurações"><Settings size={19} /></button>
           </div>
         </div>
       </div>
